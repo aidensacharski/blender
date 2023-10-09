@@ -9,7 +9,7 @@
 	#define BLEN_VER_RC_STR STRINGIFY(BLEN_VER_RC_STR_M)
 #endif
 
-APPICON ICON DISCARDABLE "winblender.ico"
+APPICON ICON DISCARDABLE "winbdk.ico"
 BLENDERFILE ICON DISCARDABLE "winblenderfile.ico"
 
 pointer_cursor CURSOR "cursors/pointer.cur"

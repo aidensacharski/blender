@@ -2166,6 +2166,11 @@ typedef struct NodeGeometryBake {
   char _pad[4];
 } NodeGeometryBake;
 
+typedef struct NodeGeometryToolActiveElement {
+  /** #AttrDomain. */
+  int8_t domain;
+} NodeGeometryToolActiveElement;
+
 /* script node mode */
 enum {
   NODE_SCRIPT_INTERNAL = 0,
@@ -2542,6 +2547,15 @@ typedef enum NodeBooleanMathOperation {
   NODE_BOOLEAN_MATH_IMPLY = 7,
   NODE_BOOLEAN_MATH_NIMPLY = 8,
 } NodeBooleanMathOperation;
+
+typedef enum NodeBitwiseOperation {
+  NODE_BITWISE_AND = 0,
+  NODE_BITWISE_OR = 1,
+  NODE_BITWISE_XOR = 2,
+  NODE_BITWISE_COMPLEMENT = 3,
+  NODE_BITWISE_SHIFT_LEFT = 4,
+  NODE_BITWISE_SHIFT_RIGHT = 5,
+} NodeBitwiseOperation;
 
 typedef enum NodeShaderMixMode {
   NODE_MIX_MODE_UNIFORM = 0,
@@ -3006,6 +3020,7 @@ typedef enum GeometryNodeCurveResampleMode {
   GEO_NODE_CURVE_RESAMPLE_COUNT = 0,
   GEO_NODE_CURVE_RESAMPLE_LENGTH = 1,
   GEO_NODE_CURVE_RESAMPLE_EVALUATED = 2,
+  GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT = 3,
 } GeometryNodeCurveResampleMode;
 
 typedef enum GeometryNodeCurveSampleMode {

@@ -2189,6 +2189,7 @@ void ED_spacetype_view3d()
   BLI_addhead(&st->regiontypes, art);
 
   view3d_buttons_register(art);
+  bdk_view3d_buttons_register(art);
 
   /* regions: tool(bar) */
   art = MEM_cnew<ARegionType>("spacetype view3d tools region");

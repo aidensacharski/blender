@@ -523,7 +523,8 @@ int isect_line_sphere_v3(const float l1[3],
                          const float sp[3],
                          float r,
                          float r_p1[3],
-                         float r_p2[3]);
+                         float r_p2[3],
+                         bool clip);
 int isect_line_sphere_v2(const float l1[2],
                          const float l2[2],
                          const float sp[2],

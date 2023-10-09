@@ -73,6 +73,18 @@ static void node_init(bNodeTree * /*tree*/, bNode *node)
   node->storage = data;
 }
 
+static void node_update(bNodeTree *ntree, bNode *node)
+{
+  const NodeGeometryCurveToPoints &storage = node_storage(*node);
+  const GeometryNodeCurveResampleMode mode = (GeometryNodeCurveResampleMode)storage.mode;
+
+  bNodeSocket *count_socket = static_cast<bNodeSocket *>(node->inputs.first)->next;
+  bNodeSocket *length_socket = count_socket->next;
+
+  bke::nodeSetSocketAvailability(ntree, count_socket, mode == GEO_NODE_CURVE_RESAMPLE_COUNT);
+  bke::nodeSetSocketAvailability(ntree, length_socket, ELEM(mode, GEO_NODE_CURVE_RESAMPLE_LENGTH, GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT));
+}
+
 static void fill_rotation_attribute(const Span<float3> tangents,
                                     const Span<float3> normals,
                                     MutableSpan<math::Quaternion> rotations)
@@ -201,6 +213,23 @@ static void curve_to_points(GeometrySet &geometry_set,
         }
       });
       break;
+    case GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT:
+      Field<float> length = params.extract_input<Field<float>>("Length");
+      geometry_set.modify_geometry_sets([&](GeometrySet& geometry) {
+        if (const Curves* src_curves_id = geometry.get_curves()) {
+          const bke::CurvesGeometry& src_curves = src_curves_id->geometry.wrap();
+          const bke::CurvesFieldContext field_context{ src_curves, ATTR_DOMAIN_CURVE };
+          bke::CurvesGeometry dst_curves = geometry::resample_to_equidistant(
+            src_curves, field_context, fn::make_constant_field<bool>(true), length, resample_attributes);
+          PointCloud *point_cloud = pointcloud_from_curves(std::move(dst_curves),
+                                                           resample_attributes.tangent_id,
+                                                           resample_attributes.normal_id,
+                                                           rotation_anonymous_id.get());
+          geometry.remove_geometry_during_modify();
+          geometry.replace_pointcloud(point_cloud);
+        }
+      });
+      break;
     }
   }
 }
@@ -220,6 +249,7 @@ static void grease_pencil_to_points(GeometrySet &geometry_set,
       count = params.extract_input<Field<int>>("Count");
       break;
     case GEO_NODE_CURVE_RESAMPLE_LENGTH:
+    case GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT:
       length = params.extract_input<Field<float>>("Length");
       break;
     case GEO_NODE_CURVE_RESAMPLE_EVALUATED:
@@ -263,6 +293,14 @@ static void grease_pencil_to_points(GeometrySet &geometry_set,
                                                          field_context,
                                                          fn::make_constant_field<bool>(true),
                                                          resample_attributes);
+            break;
+          }
+          case GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT: {
+            dst_curves = geometry::resample_to_equidistant(src_curves,
+                                                           field_context,
+                                                           fn::make_constant_field<bool>(true),
+                                                           length,
+                                                           resample_attributes);
             break;
           }
         }
@@ -353,6 +391,11 @@ static void node_rna(StructRNA *srna)
        0,
        "Length",
        "Sample each spline by splitting it into segments with the specified length"},
+      {GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT,
+       "EQUIDISTANT",
+       0,
+       "Equidistant",
+       "Sample by distributing points along each spline that are equal distance from one another"},
       {0, nullptr, 0, nullptr, nullptr},
   };
 

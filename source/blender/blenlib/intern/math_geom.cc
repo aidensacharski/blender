@@ -1384,7 +1384,8 @@ int isect_line_sphere_v3(const float l1[3],
                          const float sp[3],
                          const float r,
                          float r_p1[3],
-                         float r_p2[3])
+                         float r_p2[3],
+                         bool clip)
 {
   /* Adapted for use in blender by Campbell Barton, 2011.
    *
@@ -1412,17 +1413,19 @@ int isect_line_sphere_v3(const float l1[3],
 
   float mu;
 
+  int intersections = 0;
+
   if (i < 0.0f) {
     /* no intersections */
-    return 0;
+    intersections = 0;
   }
-  if (i == 0.0f) {
+  else if (i == 0.0f) {
     /* one intersection */
     mu = -b / (2.0f * a);
     madd_v3_v3v3fl(r_p1, l1, ldir, mu);
-    return 1;
+    intersections = 1;
   }
-  if (i > 0.0f) {
+  else if (i > 0.0f) {
     const float i_sqrt = sqrtf(i); /* avoid calc twice */
 
     /* first intersection */
@@ -1432,11 +1435,53 @@ int isect_line_sphere_v3(const float l1[3],
     /* second intersection */
     mu = (-b - i_sqrt) / (2.0f * a);
     madd_v3_v3v3fl(r_p2, l1, ldir, mu);
-    return 2;
+    intersections = 2;
+  }
+  else {
+    /* math domain error - nan */
+    return -1;
   }
 
-  /* math domain error - nan */
-  return -1;
+  if (clip) {
+    bool use_a = true, use_b = true;
+    float lambda;
+
+    // Do the clipping stuff here.
+    switch (intersections) {
+    case 1:
+      if (!(!clip || (((lambda = line_point_factor_v3(r_p1, l1, l2)) >= 0.0f) &&
+        (lambda <= 1.0f))))
+      {
+        use_a = false;
+      }
+      use_b = false;
+      break;
+    case 2:
+      if (!(!clip || (((lambda = line_point_factor_v3(r_p1, l1, l2)) >= 0.0f) &&
+        (lambda <= 1.0f))))
+      {
+        use_a = false;
+      }
+      if (!(!clip || (((lambda = line_point_factor_v3(r_p2, l1, l2)) >= 0.0f) &&
+        (lambda <= 1.0f))))
+      {
+        use_b = false;
+      }
+      break;
+    default:
+      use_a = false;
+      use_b = false;
+      break;
+    }
+
+    if (use_b && !use_a) {
+      copy_v3_v3(r_p2, r_p1);
+    }
+
+    return (int)(use_a) + (int)(use_b);
+  }
+
+  return intersections;
 }
 
 int isect_line_sphere_v2(const float l1[2],

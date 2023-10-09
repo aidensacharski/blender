@@ -675,42 +675,14 @@ static PyObject *M_Geometry_intersect_line_sphere(PyObject * /*self*/, PyObject 
     return nullptr;
   }
 
-  bool use_a = true;
-  bool use_b = true;
-  float lambda;
-
   PyObject *ret = PyTuple_New(2);
 
-  switch (isect_line_sphere_v3(line_a, line_b, sphere_co, sphere_radius, isect_a, isect_b)) {
-    case 1:
-      if (!(!clip || (((lambda = line_point_factor_v3(isect_a, line_a, line_b)) >= 0.0f) &&
-                      (lambda <= 1.0f))))
-      {
-        use_a = false;
-      }
-      use_b = false;
-      break;
-    case 2:
-      if (!(!clip || (((lambda = line_point_factor_v3(isect_a, line_a, line_b)) >= 0.0f) &&
-                      (lambda <= 1.0f))))
-      {
-        use_a = false;
-      }
-      if (!(!clip || (((lambda = line_point_factor_v3(isect_b, line_a, line_b)) >= 0.0f) &&
-                      (lambda <= 1.0f))))
-      {
-        use_b = false;
-      }
-      break;
-    default:
-      use_a = false;
-      use_b = false;
-      break;
-  }
+  const int intersections = isect_line_sphere_v3(
+    line_a, line_b, sphere_co, sphere_radius, isect_a, isect_b, clip);
 
   PyTuple_SET_ITEMS(ret,
-                    use_a ? Vector_CreatePyObject(isect_a, 3, nullptr) : Py_NewRef(Py_None),
-                    use_b ? Vector_CreatePyObject(isect_b, 3, nullptr) : Py_NewRef(Py_None));
+                    intersections > 0 ? Vector_CreatePyObject(isect_a, 3, nullptr) : Py_NewRef(Py_None),
+                    intersections > 1 ? Vector_CreatePyObject(isect_b, 3, nullptr) : Py_NewRef(Py_None));
 
   return ret;
 }

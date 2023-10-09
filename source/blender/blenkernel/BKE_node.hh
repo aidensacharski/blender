@@ -1380,6 +1380,16 @@ void node_tree_remove_layer_n(bNodeTree *ntree, Scene *scene, int layer_index);
 #define GEO_NODE_FOREACH_GEOMETRY_ELEMENT_OUTPUT 2149
 #define GEO_NODE_MERGE_LAYERS 2150
 
+ // BDK
+#define GEO_NODE_BDK_DECO_LAYER 1300
+#define GEO_NODE_BDK_FLUID_SURFACE 1301
+#define GEO_NODE_BDK_PROJECTOR 1302
+#define GEO_NODE_BDK_TERRAIN_SAMPLE 1303
+#define GEO_NODE_BDK_LINE_SPHERE_INTERSECTION 1304
+#define GEO_NODE_BDK_OBJECT_TYPE 1305
+#define GEO_NODE_BDK_OBJECT_MATERIAL_SIZE 1306
+#define GEO_NODE_BDK_MATERIAL_SIZE 1307
+
 /** \} */
 
 /* -------------------------------------------------------------------- */
@@ -1430,6 +1440,8 @@ void node_tree_remove_layer_n(bNodeTree *ntree, Scene *scene, int layer_index);
 #define FN_NODE_HASH_VALUE 1245
 #define FN_NODE_INTEGER_MATH 1246
 #define FN_NODE_MATRIX_DETERMINANT 1247
+
+#define FN_NODE_BITWISE_OPERATION 1273
 
 /** \} */
 

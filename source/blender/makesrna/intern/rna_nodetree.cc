@@ -281,6 +281,16 @@ const EnumPropertyItem rna_enum_node_vec_math_items[] = {
     {0, nullptr, 0, nullptr, nullptr},
 };
 
+const EnumPropertyItem rna_enum_node_bitwise_operation_items[] = {
+    {NODE_BITWISE_AND, "AND", 0, "Bitwise And", "And"},
+    {NODE_BITWISE_OR, "OR", 0, "Bitwise Or", "Or"},
+    {NODE_BITWISE_XOR, "XOR", 0, "Bitwise Exclusive Or", "Exclusive Or"},
+    {NODE_BITWISE_COMPLEMENT, "COMPLEMENT", 0, "Bitwise Complement", "Complement"},
+    {NODE_BITWISE_SHIFT_LEFT, "SHIFT_LEFT", 0, "Bitwise Shift Left", "Shift left"},
+    {NODE_BITWISE_SHIFT_RIGHT, "SHIFT_RIGHT", 0, "Bitwise Shift Right", "Shift right"},
+    {0, nullptr, 0, nullptr, nullptr},
+};
+
 const EnumPropertyItem rna_enum_node_boolean_math_items[] = {
     {NODE_BOOLEAN_MATH_AND, "AND", 0, "And", "True when both inputs are true"},
     {NODE_BOOLEAN_MATH_OR, "OR", 0, "Or", "True when at least one input is true"},

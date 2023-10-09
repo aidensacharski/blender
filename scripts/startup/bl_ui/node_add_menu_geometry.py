@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-from bpy.types import Menu
+import typing
+import bpy
+from bpy.types import Context, Menu
 from bl_ui import node_add_menu
 from bpy.app.translations import (
     pgettext_iface as iface_,
@@ -673,6 +675,7 @@ class NODE_MT_category_GEO_UTILITIES_MATH(Menu):
         layout = self.layout
         node_add_menu.add_node_type(layout, "FunctionNodeBooleanMath")
         node_add_menu.add_node_type(layout, "FunctionNodeIntegerMath")
+        node_add_menu.add_node_type(layout, "FunctionNodeBitwiseOperation")
         node_add_menu.add_node_type(layout, "ShaderNodeClamp")
         node_add_menu.add_node_type(layout, "FunctionNodeCompare")
         node_add_menu.add_node_type(layout, "ShaderNodeFloatCurve")
@@ -795,6 +798,25 @@ class NODE_MT_category_GEO_GROUP(Menu):
         node_add_menu.draw_assets_for_catalog(layout, self.bl_label)
 
 
+class NODE_MT_category_GEO_BDK(Menu):
+    bl_idname = "NODE_MT_category_GEO_BDK"
+    bl_label = "BDK"
+
+    def draw(self, _context):
+        layout = self.layout
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKObjectType")
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKMaterialSize")
+        layout.separator()
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKMaterialSize")
+        layout.separator()
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKTerrainSample")
+        layout.separator()
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKDecoLayer")
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKFluidSurface")
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKProjector")
+        node_add_menu.add_node_type(layout, "GeometryNodeBDKLineSphereIntersection")
+
+
 class NODE_MT_geometry_node_add_all(Menu):
     bl_idname = "NODE_MT_geometry_node_add_all"
     bl_label = ""
@@ -821,6 +843,8 @@ class NODE_MT_geometry_node_add_all(Menu):
         layout.separator()
         layout.menu("NODE_MT_category_GEO_GROUP")
         layout.menu("NODE_MT_category_layout")
+        layout.separator()
+        layout.menu("NODE_MT_category_GEO_BDK")
         node_add_menu.draw_root_assets(layout)
 
 
@@ -875,6 +899,7 @@ classes = (
     NODE_MT_category_utilities_matrix,
     NODE_MT_category_GEO_UTILITIES_DEPRECATED,
     NODE_MT_category_GEO_GROUP,
+    NODE_MT_category_GEO_BDK,
 )
 
 if __name__ == "__main__":  # only for live edit.

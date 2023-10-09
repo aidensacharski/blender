@@ -238,6 +238,15 @@ set(SRC
   include/NOD_geo_repeat.hh
   include/NOD_geo_simulation.hh
 
+  nodes/node_geo_bdk_deco_layer.cc
+  nodes/node_geo_bdk_projector.cc
+  nodes/node_geo_bdk_fluid_surface.cc
+  nodes/node_geo_bdk_terrain_sample.cc
+  nodes/node_geo_bdk_line_sphere_intersection.cc
+  nodes/node_geo_bdk_object_type.cc
+  nodes/node_geo_bdk_object_material_size.cc
+  nodes/node_geo_bdk_material_size.cc
+
   node_geometry_tree.cc
   node_geometry_util.cc
 

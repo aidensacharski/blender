@@ -61,4 +61,13 @@ CurvesGeometry resample_to_evaluated(const CurvesGeometry &src_curves,
                                      const fn::Field<bool> &selection_field,
                                      const ResampleCurvesOutputAttributeIDs &output_ids = {});
 
+/**
+ * 
+ */
+CurvesGeometry resample_to_equidistant(const CurvesGeometry &src_curves,
+                                       const fn::FieldContext& field_context,
+                                       const fn::Field<bool>& selection_field,
+                                       const fn::Field<float>& segment_length_field,
+                                       const ResampleCurvesOutputAttributeIDs& output_ids = {});
+
 }  // namespace blender::geometry

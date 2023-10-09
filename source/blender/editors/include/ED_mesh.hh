@@ -483,7 +483,7 @@ KeyBlock *ED_mesh_get_edit_shape_key(const Mesh *me);
 /**
  * Returns the pinned mesh, the mesh from the pinned object, or the mesh from the active object.
  */
-Mesh *ED_mesh_context(bContext *C);
+Mesh *ED_mesh_context(const bContext *C);
 
 /**
  * Split all edges that would appear sharp based on face and edge sharpness tags and the

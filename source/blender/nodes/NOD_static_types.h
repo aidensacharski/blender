@@ -269,6 +269,7 @@ DefNode(FunctionNode, FN_NODE_ALIGN_EULER_TO_VECTOR, 0, "ALIGN_EULER_TO_VECTOR",
 DefNode(FunctionNode, FN_NODE_ALIGN_ROTATION_TO_VECTOR, 0, "ALIGN_ROTATION_TO_VECTOR", AlignRotationToVector, "Align Rotation to Vector", "")
 DefNode(FunctionNode, FN_NODE_AXES_TO_ROTATION, 0, "AXES_TO_ROTATION", AxesToRotation, "Axes to Rotation", "Create a rotation from a primary and (ideally orthogonal) secondary axis")
 DefNode(FunctionNode, FN_NODE_AXIS_ANGLE_TO_ROTATION, 0, "AXIS_ANGLE_TO_ROTATION", AxisAngleToRotation, "Axis Angle to Rotation", "")
+DefNode(FunctionNode, FN_NODE_BITWISE_OPERATION, 0, "BITWISE_OPERATION", BitwiseOperation, "Bitwise Operation", "")
 DefNode(FunctionNode, FN_NODE_BOOLEAN_MATH, 0, "BOOLEAN_MATH", BooleanMath, "Boolean Math", "")
 DefNode(FunctionNode, FN_NODE_COMBINE_COLOR, 0, "COMBINE_COLOR", CombineColor, "Combine Color", "")
 DefNode(FunctionNode, FN_NODE_COMBINE_MATRIX, 0, "COMBINE_MATRIX", CombineMatrix, "Combine Matrix", "Construct a 4x4 matrix from its individual values")
@@ -508,6 +509,16 @@ DefNode(GeometryNode, GEO_NODE_VIEWER, 0, "VIEWER", Viewer, "Viewer", "Display t
 DefNode(GeometryNode, GEO_NODE_VOLUME_CUBE, 0, "VOLUME_CUBE", VolumeCube, "Volume Cube", "Generate a dense volume with a field that controls the density at each grid voxel based on its position")
 DefNode(GeometryNode, GEO_NODE_VOLUME_TO_MESH, 0, "VOLUME_TO_MESH", VolumeToMesh, "Volume to Mesh", "Generate a mesh on the \"surface\" of a volume")
 DefNode(GeometryNode, GEO_NODE_WARNING, 0, "WARNING", Warning, "Warning", "Create custom warnings in node groups")
+
+// BDK
+DefNode(GeometryNode, GEO_NODE_BDK_DECO_LAYER, 0, "BDK_DECO_LAYER", BDKDecoLayer, "BDK Deco Layer", "Generate a layer of decoration meshes on terrain")
+DefNode(GeometryNode, GEO_NODE_BDK_FLUID_SURFACE, 0, "BDK_FLUID_SURFACE", BDKFluidSurface, "BDK Fluid Surface", "Generate a FluidSurface mesh")
+DefNode(GeometryNode, GEO_NODE_BDK_PROJECTOR, 0, "BDK_PROJECTOR", BDKProjector, "BDK Projector", "Generate a Projector mesh")
+DefNode(GeometryNode, GEO_NODE_BDK_TERRAIN_SAMPLE, 0, "BDK_TERRAIN_SAMPLE", BDKTerrainSample, "BDK Terrain Sample", "Sample the terrain mesh at the given coordinate")
+DefNode(GeometryNode, GEO_NODE_BDK_LINE_SPHERE_INTERSECTION, 0, "BDK_LINE_SPHERE_INTERSECTION", BDKLineSphereIntersection, "BDK Line Sphere Intersection", "Find the intersection point between a line and a sphere")
+DefNode(GeometryNode, GEO_NODE_BDK_OBJECT_TYPE, 0, "GEO_NODE_BDK_OBJECT_TYPE", BDKObjectType, "BDK Object Type", "Get the BDK object type from an object")
+DefNode(GeometryNode, GEO_NODE_BDK_OBJECT_MATERIAL_SIZE, 0, "GEO_NODE_BDK_OBJECT_MATERIAL_SIZE", BDKObjectMaterialSize, "BDK Object Material Size", "Get the size of a BDK material in an object's material slot")
+DefNode(GeometryNode, GEO_NODE_BDK_MATERIAL_SIZE, 0, "GEO_NODE_BDK_MATERIAL_SIZE", BDKMaterialSize, "BDK Material Size", "Get the size of a BDK material")
 
 /* undefine macros */
 #undef DefNode
