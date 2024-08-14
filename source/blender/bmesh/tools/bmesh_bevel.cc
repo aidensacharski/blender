@@ -7549,45 +7549,86 @@ static float geometry_collide_offset(BevelParams *bp, EdgeHalf *eb)
   if (ea->e == eb->e || (ec && ec->e == eb->e)) {
     return no_collide_offset;
   }
-  ka = ka / bp->offset;
-  kb = kb / bp->offset;
-  kc = kc / bp->offset;
   float th1 = angle_v3v3v3(va->co, vb->co, vc->co);
   float th2 = angle_v3v3v3(vb->co, vc->co, vd->co);
 
   /* First calculate offset at which edge B collapses, which happens
    * when advancing clones of A, B, C all meet at a point.
    * This only happens if at least two of those three edges have non-zero k's. */
-  float sin1 = sinf(th1);
-  float sin2 = sinf(th2);
-  if ((ka > 0.0f) + (kb > 0.0f) + (kc > 0.0f) >= 2) {
-    float tan1 = tanf(th1);
-    float tan2 = tanf(th2);
-    float g = tan1 * tan2;
-    float h = sin1 * sin2;
-    float den = g * (ka * sin2 + kc * sin1) + kb * h * (tan1 + tan2);
-    if (den != 0.0f) {
-      float t = BM_edge_calc_length(eb->e);
-      t *= g * h / den;
-      if (t >= 0.0f) {
-        limit = t;
-      }
+  float sin1 = max_ff(sinf(th1), FLT_EPSILON);
+  float sin2 = max_ff(sinf(th2), FLT_EPSILON);
+  float cos1 = cosf(th1);
+  float cos2 = cosf(th2);
+  float offset1 = 0.0f;
+  float offset2 = 0.0f;
+  float offsets_projected_on_B = 0.0f;
+  if (ka > 0.0f) {
+    if (cos1 < 0.0f) {
+      offset1 = min_ff(sin1 / ka, (ka + cos1 * kb) / sin1);
     }
+    else {
+      offset1 = (ka + cos1 * kb) / sin1;
+    }
+  }
+  if (kc > 0.0f) {
+    if (cos2 < 0.0f) {
+      offset2 = min_ff(sin2 / kc, (kc + cos2 * kb) / sin2);
+    }
+    else {
+      offset2 = (kc + cos2 * kb) / sin2;
+    }
+  }
+  offsets_projected_on_B = offset1 + offset2;
+  if (offsets_projected_on_B > FLT_EPSILON) {
+    limit = bp->offset * (len_v3v3(vb->co, vc->co) / offsets_projected_on_B);
   }
 
   /* Now check edge slide cases. */
-  if (kb > 0.0f && ka == 0.0f /* `&& bvb->selcount == 1 && bvb->edgecount > 2` */) {
-    float t = BM_edge_calc_length(ea->e);
-    t *= sin1 / kb;
-    if (t >= 0.0f && t < limit) {
-      limit = t;
+  if (ka == 0.0f) {
+    BMLoop *la = BM_face_edge_share_loop(eb->fnext, ea->e);
+    if (la) {
+      float A_side_slide = 0.0f;
+      float exterior_angle = 0.0f;
+      bool first = true;
+      while (exterior_angle < 0.0001f) {
+        if (first) {
+          exterior_angle = (float)M_PI - th1;
+          first = false;
+        }
+        else {
+          la = la->prev;
+          exterior_angle += (float)M_PI -
+                            angle_v3v3v3(la->v->co, la->next->v->co, la->next->next->v->co);
+        }
+        A_side_slide += BM_edge_calc_length(la->e) * sinf(exterior_angle);
+      }
+      if (A_side_slide < limit) {
+        limit = A_side_slide;
+      }
     }
   }
-  if (kb > 0.0f && kc == 0.0f /* `&& bvc && ec && bvc->selcount == 1 && bvc->edgecount > 2` */) {
-    float t = BM_edge_calc_length(ec->e);
-    t *= sin2 / kb;
-    if (t >= 0.0f && t < limit) {
-      limit = t;
+  if (kc == 0.0f) {
+    BMLoop *lc = BM_face_edge_share_loop(eb->fnext, eb->e);
+    if (lc) {
+      lc = lc->next;
+      float C_side_slide = 0.0f;
+      float exterior_angle = 0.0f;
+      bool first = true;
+      while (exterior_angle < 0.0001f) {
+        if (first) {
+          exterior_angle = (float)M_PI - th2;
+          first = false;
+        }
+        else {
+          lc = lc->next;
+          exterior_angle += (float)M_PI -
+                            angle_v3v3v3(lc->prev->v->co, lc->v->co, lc->next->v->co);
+        }
+        C_side_slide += BM_edge_calc_length(lc->e) * sinf(exterior_angle);
+      }
+      if (C_side_slide < limit) {
+        limit = C_side_slide;
+      }
     }
   }
   return limit;
