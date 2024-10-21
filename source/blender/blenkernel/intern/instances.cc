@@ -131,6 +131,12 @@ bool operator==(const InstanceReference &a, const InstanceReference &b)
   return a.type_ == b.type_ && a.data_ == b.data_;
 }
 
+uint64_t InstanceReference::hash() const
+{
+  const uint64_t geometry_hash = geometry_set_ ? geometry_set_->hash() : 0;
+  return get_default_hash(geometry_hash, type_, data_);
+}
+
 Instances::Instances()
 {
   CustomData_reset(&attributes_);
@@ -273,8 +279,7 @@ Span<InstanceReference> Instances::references() const
   return references_;
 }
 
-void Instances::remove(const IndexMask &mask,
-                       const AnonymousAttributePropagationInfo &propagation_info)
+void Instances::remove(const IndexMask &mask, const AttributeFilter &attribute_filter)
 {
   const std::optional<IndexRange> masked_range = mask.to_range();
   if (masked_range.has_value() && masked_range->start() == 0) {
@@ -290,8 +295,8 @@ void Instances::remove(const IndexMask &mask,
 
   gather_attributes(this->attributes(),
                     AttrDomain::Instance,
-                    propagation_info,
-                    {},
+                    AttrDomain::Instance,
+                    attribute_filter,
                     mask,
                     new_instances.attributes_for_write());
 

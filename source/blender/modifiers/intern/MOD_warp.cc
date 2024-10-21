@@ -21,7 +21,7 @@
 #include "DNA_object_types.h"
 #include "DNA_screen_types.h"
 
-#include "BKE_action.h" /* BKE_pose_channel_find_name */
+#include "BKE_action.hh" /* BKE_pose_channel_find_name */
 #include "BKE_colortools.hh"
 #include "BKE_deform.hh"
 #include "BKE_lib_query.hh"
@@ -405,7 +405,7 @@ static void texture_panel_draw(const bContext *C, Panel *panel)
 
   int texture_coords = RNA_enum_get(ptr, "texture_coords");
 
-  uiTemplateID(layout, C, ptr, "texture", "texture.new", nullptr, nullptr, 0, ICON_NONE, nullptr);
+  uiTemplateID(layout, C, ptr, "texture", "texture.new", nullptr, nullptr);
 
   uiLayoutSetPropSep(layout, true);
 

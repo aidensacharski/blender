@@ -5,7 +5,7 @@
 bl_info = {
     'name': 'glTF 2.0 format',
     'author': 'Julien Duroure, Scurest, Norbert Nopper, Urs Hanselmann, Moritz Becher, Benjamin Schmithüsen, Jim Eckerlein, and many external contributors',
-    "version": (4, 3, 23),
+    "version": (4, 4, 0),
     'blender': (4, 2, 0),
     'location': 'File > Import-Export',
     'description': 'Import-Export as glTF 2.0',
@@ -975,7 +975,7 @@ class ExportGLTF2_Base(ConvertGLTF2_Base):
     export_extra_animations: BoolProperty(
         name='Prepare extra animations',
         description=(
-            'Export additional animations'
+            'Export additional animations.\n'
             'This feature is not standard and needs an external extension to be included in the glTF file'
         ),
         default=False
@@ -1021,7 +1021,8 @@ class ExportGLTF2_Base(ConvertGLTF2_Base):
                         'glTF2ExportUserExtension') or hasattr(
                         sys.modules[addon_name],
                         'glTF2ExportUserExtensions'):
-                    exporter_extension_layout_draw[addon_name] = sys.modules[addon_name].draw
+                    exporter_extension_layout_draw[addon_name] = sys.modules[addon_name].draw_export if hasattr(
+                        sys.modules[addon_name], 'draw_export') else sys.modules[addon_name].draw
             except Exception:
                 pass
 
@@ -1720,8 +1721,8 @@ def export_panel_gltfpack(layout, operator):
         col.prop(operator, 'export_gltfpack_vc')
         col = body.column(heading="Vertex positions", align=True)
         col.prop(operator, 'export_gltfpack_vpi')
-        #col = body.column(heading = "Animations", align = True)
-        #col = body.column(heading = "Scene", align = True)
+        # col = body.column(heading = "Animations", align = True)
+        # col = body.column(heading = "Scene", align = True)
         col = body.column(heading="Miscellaneous", align=True)
         col.prop(operator, 'export_gltfpack_noq')
 
@@ -1866,7 +1867,8 @@ class ImportGLTF2(Operator, ConvertGLTF2_Base, ImportHelper):
                         'glTF2ImportUserExtension') or hasattr(
                         sys.modules[addon_name],
                         'glTF2ImportUserExtensions'):
-                    importer_extension_layout_draw[addon_name] = sys.modules[addon_name].draw
+                    importer_extension_layout_draw[addon_name] = sys.modules[addon_name].draw_import if hasattr(
+                        sys.modules[addon_name], 'draw_import') else sys.modules[addon_name].draw
             except Exception:
                 pass
 

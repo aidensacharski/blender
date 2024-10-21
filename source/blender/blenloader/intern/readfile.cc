@@ -184,7 +184,6 @@ static CLG_LogRef LOG_UNDO = {"blo.readfile.undo"};
 static void read_libraries(FileData *basefd, ListBase *mainlist);
 static void *read_struct(FileData *fd, BHead *bh, const char *blockname, const int id_type_index);
 static BHead *find_bhead_from_code_name(FileData *fd, const short idcode, const char *name);
-static BHead *find_bhead_from_idname(FileData *fd, const char *idname);
 
 struct BHeadN {
   BHeadN *next, *prev;
@@ -1712,7 +1711,7 @@ static void switch_endian_structs(const SDNA *filesdna, BHead *bhead)
  * Generate the final allocation string reference for read blocks of data. If \a blockname is
  * given, use it as 'owner block' info, otherwise use the id type index to get that info.
  *
- * \note: These strings are stored until Blender exits
+ * \note These strings are stored until Blender exits
  */
 static const char *get_alloc_name(FileData *fd,
                                   BHead *bh,
@@ -2088,10 +2087,6 @@ static void direct_link_id_common(
     id->session_uid = MAIN_ID_SESSION_UID_UNSET;
   }
 
-  if ((id_tag & ID_TAG_TEMP_MAIN) == 0) {
-    BKE_lib_libblock_session_uid_ensure(id);
-  }
-
   id->lib = current_library;
   if (id->lib) {
     /* Always fully clear fake user flag for linked data. */
@@ -2109,6 +2104,10 @@ static void direct_link_id_common(
   }
   else {
     id->tag = id_tag;
+  }
+
+  if ((id_tag & ID_TAG_TEMP_MAIN) == 0) {
+    BKE_lib_libblock_session_uid_ensure(id);
   }
 
   if (ID_IS_LINKED(id)) {
@@ -2272,8 +2271,6 @@ static void lib_link_scenes_check_set(Main *bmain)
 
 static void direct_link_library(FileData *fd, Library *lib, Main *main)
 {
-  Main *newmain;
-
   /* Make sure we have full path in lib->runtime.filepath_abs */
   /* NOTE: Since existing libraries are searched by their absolute path, this has to be generated
    * before the lookup below. Otherwise, in case the stored absolute filepath is not 'correct' (may
@@ -2321,7 +2318,7 @@ static void direct_link_library(FileData *fd, Library *lib, Main *main)
   BKE_packedfile_blend_read(&reader, &lib->packedfile, lib->filepath);
 
   /* new main */
-  newmain = BKE_main_new();
+  Main *newmain = BKE_main_new();
   BLI_addtail(fd->mainlist, newmain);
   newmain->curlib = lib;
 
@@ -2524,7 +2521,7 @@ static void read_undo_reuse_noundo_local_ids(FileData *fd)
   ListBase *lbarray[INDEX_ID_MAX];
 
   BLI_assert(old_bmain->curlib == nullptr);
-  BLI_assert(BLI_listbase_count_at_most(fd->mainlist, 2) == 1);
+  BLI_assert(BLI_listbase_is_single(fd->mainlist));
 
   int i = set_listbasepointers(old_bmain, lbarray);
   while (i--) {

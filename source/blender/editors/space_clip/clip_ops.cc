@@ -24,7 +24,7 @@
 
 #include "BLI_fileops.h"
 #include "BLI_math_vector.h"
-#include "BLI_path_util.h"
+#include "BLI_path_utils.hh"
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "BLI_task.h"
@@ -219,7 +219,9 @@ static int open_exec(bContext *C, wmOperator *op)
 
   if (!clip) {
     if (op->customdata) {
-      MEM_freeN(op->customdata);
+      pprop = static_cast<PropertyPointerRNA *>(op->customdata);
+      op->customdata = nullptr;
+      MEM_delete(pprop);
     }
 
     BKE_reportf(op->reports,
@@ -254,7 +256,8 @@ static int open_exec(bContext *C, wmOperator *op)
   WM_event_add_notifier(C, NC_MOVIECLIP | NA_ADDED, clip);
 
   DEG_relations_tag_update(bmain);
-  MEM_freeN(op->customdata);
+  op->customdata = nullptr;
+  MEM_delete(pprop);
 
   return OPERATOR_FINISHED;
 }

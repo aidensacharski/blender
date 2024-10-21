@@ -505,14 +505,16 @@ static void grease_pencil_primitive_update_curves(PrimitiveToolOperation &ptd)
 
   /* Initialize the rest of the attributes with default values. */
   bke::MutableAttributeAccessor attributes = curves.attributes_for_write();
-  bke::fill_attribute_range_default(attributes,
-                                    bke::AttrDomain::Point,
-                                    skipped_attribute_ids(ptd, bke::AttrDomain::Point),
-                                    curve_points);
-  bke::fill_attribute_range_default(attributes,
-                                    bke::AttrDomain::Curve,
-                                    skipped_attribute_ids(ptd, bke::AttrDomain::Curve),
-                                    curves.curves_range().take_back(1));
+  bke::fill_attribute_range_default(
+      attributes,
+      bke::AttrDomain::Point,
+      bke::attribute_filter_from_skip_ref(skipped_attribute_ids(ptd, bke::AttrDomain::Point)),
+      curve_points);
+  bke::fill_attribute_range_default(
+      attributes,
+      bke::AttrDomain::Curve,
+      bke::attribute_filter_from_skip_ref(skipped_attribute_ids(ptd, bke::AttrDomain::Curve)),
+      curves.curves_range().take_back(1));
 
   ptd.drawing->tag_topology_changed();
   ptd.drawing->set_texture_matrices({ptd.texture_space},
@@ -567,14 +569,16 @@ static void grease_pencil_primitive_init_curves(PrimitiveToolOperation &ptd)
   curves.update_curve_types();
 
   /* Initialize the rest of the attributes with default values. */
-  bke::fill_attribute_range_default(attributes,
-                                    bke::AttrDomain::Point,
-                                    skipped_attribute_ids(ptd, bke::AttrDomain::Point),
-                                    curves.points_range().take_back(1));
-  bke::fill_attribute_range_default(attributes,
-                                    bke::AttrDomain::Curve,
-                                    skipped_attribute_ids(ptd, bke::AttrDomain::Curve),
-                                    curves.curves_range().take_back(1));
+  bke::fill_attribute_range_default(
+      attributes,
+      bke::AttrDomain::Point,
+      bke::attribute_filter_from_skip_ref(skipped_attribute_ids(ptd, bke::AttrDomain::Point)),
+      curves.points_range().take_back(1));
+  bke::fill_attribute_range_default(
+      attributes,
+      bke::AttrDomain::Curve,
+      bke::attribute_filter_from_skip_ref(skipped_attribute_ids(ptd, bke::AttrDomain::Curve)),
+      curves.curves_range().take_back(1));
 
   grease_pencil_primitive_update_curves(ptd);
 }
@@ -1380,7 +1384,7 @@ static void GREASE_PENCIL_OT_primitive_line(wmOperatorType *ot)
   /* Identifiers. */
   ot->name = "Grease Pencil Line Shape";
   ot->idname = "GREASE_PENCIL_OT_primitive_line";
-  ot->description = "Create predefined grease pencil stroke lines";
+  ot->description = "Create predefined Grease Pencil stroke lines";
 
   /* Callbacks. */
   ot->invoke = grease_pencil_primitive_invoke;
@@ -1399,7 +1403,7 @@ static void GREASE_PENCIL_OT_primitive_polyline(wmOperatorType *ot)
   /* Identifiers. */
   ot->name = "Grease Pencil Polyline Shape";
   ot->idname = "GREASE_PENCIL_OT_primitive_polyline";
-  ot->description = "Create predefined grease pencil stroke polylines";
+  ot->description = "Create predefined Grease Pencil stroke polylines";
 
   /* Callbacks. */
   ot->invoke = grease_pencil_primitive_invoke;
@@ -1418,7 +1422,7 @@ static void GREASE_PENCIL_OT_primitive_arc(wmOperatorType *ot)
   /* Identifiers. */
   ot->name = "Grease Pencil Arc Shape";
   ot->idname = "GREASE_PENCIL_OT_primitive_arc";
-  ot->description = "Create predefined grease pencil stroke arcs";
+  ot->description = "Create predefined Grease Pencil stroke arcs";
 
   /* Callbacks. */
   ot->invoke = grease_pencil_primitive_invoke;
@@ -1437,7 +1441,7 @@ static void GREASE_PENCIL_OT_primitive_curve(wmOperatorType *ot)
   /* Identifiers. */
   ot->name = "Grease Pencil Curve Shape";
   ot->idname = "GREASE_PENCIL_OT_primitive_curve";
-  ot->description = "Create predefined grease pencil stroke curve shapes";
+  ot->description = "Create predefined Grease Pencil stroke curve shapes";
 
   /* Callbacks. */
   ot->invoke = grease_pencil_primitive_invoke;
@@ -1456,7 +1460,7 @@ static void GREASE_PENCIL_OT_primitive_box(wmOperatorType *ot)
   /* Identifiers. */
   ot->name = "Grease Pencil Box Shape";
   ot->idname = "GREASE_PENCIL_OT_primitive_box";
-  ot->description = "Create predefined grease pencil stroke boxes";
+  ot->description = "Create predefined Grease Pencil stroke boxes";
 
   /* Callbacks. */
   ot->invoke = grease_pencil_primitive_invoke;
@@ -1475,7 +1479,7 @@ static void GREASE_PENCIL_OT_primitive_circle(wmOperatorType *ot)
   /* Identifiers. */
   ot->name = "Grease Pencil Circle Shape";
   ot->idname = "GREASE_PENCIL_OT_primitive_circle";
-  ot->description = "Create predefined grease pencil stroke circles";
+  ot->description = "Create predefined Grease Pencil stroke circles";
 
   /* Callbacks. */
   ot->invoke = grease_pencil_primitive_invoke;

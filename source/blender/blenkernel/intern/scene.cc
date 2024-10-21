@@ -53,7 +53,7 @@
 
 #include "BLT_translation.hh"
 
-#include "BKE_action.h"
+#include "BKE_action.hh"
 #include "BKE_anim_data.hh"
 #include "BKE_animsys.h"
 #include "BKE_bpath.hh"
@@ -226,7 +226,7 @@ static void scene_init_data(ID *id)
 
   BKE_color_managed_display_settings_init(&scene->display_settings);
   BKE_color_managed_view_settings_init_render(
-      &scene->view_settings, &scene->display_settings, "Filmic");
+      &scene->view_settings, &scene->display_settings, "AgX");
   STRNCPY(scene->sequencer_colorspace_settings.name, colorspace_name);
 
   BKE_image_format_init(&scene->r.im_format, true);
@@ -352,6 +352,10 @@ static void scene_copy_data(Main *bmain,
   if (scene_src->ed) {
     scene_dst->ed = MEM_cnew<Editing>(__func__);
     scene_dst->ed->seqbasep = &scene_dst->ed->seqbase;
+    scene_dst->ed->cache_flag = scene_src->ed->cache_flag;
+    scene_dst->ed->show_missing_media_flag = scene_src->ed->show_missing_media_flag;
+    scene_dst->ed->proxy_storage = scene_src->ed->proxy_storage;
+    STRNCPY(scene_dst->ed->proxy_dir, scene_src->ed->proxy_dir);
     SEQ_sequence_base_dupli_recursive(scene_src,
                                       scene_dst,
                                       &scene_dst->ed->seqbase,
@@ -1189,7 +1193,7 @@ static void link_recurs_seq(BlendDataReader *reader, ListBase *lb)
 
   LISTBASE_FOREACH_MUTABLE (Sequence *, seq, lb) {
     /* Sanity check. */
-    if (!SEQ_valid_strip_channel(seq)) {
+    if (!SEQ_is_valid_strip_channel(seq)) {
       BLI_freelinkN(lb, seq);
       BLO_read_data_reports(reader)->count.sequence_strips_skipped++;
     }
@@ -1861,6 +1865,7 @@ Scene *BKE_scene_duplicate(Main *bmain, Scene *sce, eSceneCopyMethod type)
      * duplicate along the object itself). */
     BKE_collection_duplicate(bmain,
                              nullptr,
+                             nullptr,
                              sce_copy->master_collection,
                              duplicate_flags,
                              LIB_ID_DUPLICATE_IS_SUBPROCESS);
@@ -1871,12 +1876,14 @@ Scene *BKE_scene_duplicate(Main *bmain, Scene *sce, eSceneCopyMethod type)
       if (sce_copy->rigidbody_world->group != nullptr) {
         BKE_collection_duplicate(bmain,
                                  nullptr,
+                                 nullptr,
                                  sce_copy->rigidbody_world->group,
                                  duplicate_flags,
                                  LIB_ID_DUPLICATE_IS_SUBPROCESS);
       }
       if (sce_copy->rigidbody_world->constraints != nullptr) {
         BKE_collection_duplicate(bmain,
+                                 nullptr,
                                  nullptr,
                                  sce_copy->rigidbody_world->constraints,
                                  duplicate_flags,
@@ -2865,8 +2872,12 @@ void BKE_render_resolution(const RenderData *r, const bool use_crop, int *r_widt
   *r_height = (r->ysch * r->size) / 100;
 
   if (use_crop && (r->mode & R_BORDER) && (r->mode & R_CROP)) {
-    *r_width *= BLI_rctf_size_x(&r->border);
-    *r_height *= BLI_rctf_size_y(&r->border);
+    /* Compute the difference between the integer bounds instead of multiplying by the float
+     * border size directly to be consistent with how the render pipeline computes render size, see
+     * for instance render_init_from_main. That's because difference in rounding and imprecisions
+     * can cause off by one errors. */
+    *r_width = int(r->border.xmax * *r_width) - int(r->border.xmin * *r_width);
+    *r_height = int(r->border.ymax * *r_height) - int(r->border.ymin * *r_height);
   }
 }
 

@@ -52,7 +52,7 @@
 #include "DNA_vfont_types.h"
 #include "DNA_world_types.h"
 
-#include "BKE_action.h"
+#include "BKE_action.hh"
 #include "BKE_anim_data.hh"
 #include "BKE_animsys.h"
 #include "BKE_armature.hh"
@@ -856,6 +856,10 @@ void DepsgraphNodeBuilder::build_object(int base_index,
   OperationNode *instance_node = add_operation_node(
       &object->id, NodeType::INSTANCING, OperationCode::INSTANCE);
   instance_node->flag |= OperationFlag::DEPSOP_FLAG_PINNED;
+
+  OperationNode *instance_geometry_node = add_operation_node(
+      &object->id, NodeType::INSTANCING, OperationCode::INSTANCE_GEOMETRY);
+  instance_geometry_node->flag |= OperationFlag::DEPSOP_FLAG_PINNED;
 
   build_object_light_linking(object);
 
@@ -1779,18 +1783,6 @@ void DepsgraphNodeBuilder::build_object_data_geometry_datablock(ID *obdata)
       break;
     }
 
-    case ID_GD_LEGACY: {
-      /* GPencil evaluation operations. */
-      op_node = add_operation_node(obdata,
-                                   NodeType::GEOMETRY,
-                                   OperationCode::GEOMETRY_EVAL,
-                                   [obdata_cow](::Depsgraph *depsgraph) {
-                                     BKE_gpencil_frame_active_set(depsgraph,
-                                                                  (bGPdata *)obdata_cow);
-                                   });
-      op_node->set_as_entry();
-      break;
-    }
     case ID_CV: {
       Curves *curves_id = reinterpret_cast<Curves *>(obdata);
 

@@ -45,7 +45,9 @@ const EnumPropertyItem rna_enum_window_cursor_items[] = {
     {WM_CURSOR_PAINT, "PAINT_CROSS", 0, "Paint Cross", ""},
     {WM_CURSOR_DOT, "DOT", 0, "Dot Cursor", ""},
     {WM_CURSOR_ERASER, "ERASER", 0, "Eraser", ""},
-    {WM_CURSOR_HAND, "HAND", 0, "Hand", ""},
+    {WM_CURSOR_HAND, "HAND", 0, "Open Hand", ""},
+    {WM_CURSOR_HAND_POINT, "HAND_POINT", 0, "Pointing Hand", ""},
+    {WM_CURSOR_HAND_CLOSED, "HAND_CLOSED", 0, "Closed Hand", ""},
     {WM_CURSOR_EW_SCROLL, "SCROLL_X", 0, "Scroll-X", ""},
     {WM_CURSOR_NS_SCROLL, "SCROLL_Y", 0, "Scroll-Y", ""},
     {WM_CURSOR_NSEW_SCROLL, "SCROLL_XY", 0, "Scroll-XY", ""},
@@ -805,7 +807,7 @@ void RNA_api_window(StructRNA *srna)
   RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED);
   RNA_def_function_ui_description(func, "Set the cursor, so the previous cursor can be restored");
 
-  RNA_def_function(srna, "cursor_modal_restore", "WM_cursor_modal_restore");
+  func = RNA_def_function(srna, "cursor_modal_restore", "WM_cursor_modal_restore");
   RNA_def_function_ui_description(
       func, "Restore the previous cursor after calling ``cursor_modal_set``");
 

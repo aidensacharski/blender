@@ -55,6 +55,7 @@
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
 #include "RNA_path.hh"
+#include "RNA_types.hh"
 
 #include "WM_api.hh"
 #include "WM_message.hh"
@@ -62,6 +63,10 @@
 /* flush updates */
 #include "DNA_object_types.h"
 #include "WM_types.hh"
+
+#ifdef WITH_PYTHON
+#  include "BPY_extern.hh"
+#endif
 
 #include "rna_access_internal.hh"
 #include "rna_internal.hh"
@@ -93,6 +98,21 @@ void RNA_init()
     BLI_ghash_insert(BLENDER_RNA.structs_map, (void *)srna->identifier, srna);
     BLENDER_RNA.structs_len += 1;
   }
+}
+
+void RNA_bpy_exit()
+{
+#ifdef WITH_PYTHON
+  StructRNA *srna;
+
+  for (srna = static_cast<StructRNA *>(BLENDER_RNA.structs.first); srna;
+       srna = static_cast<StructRNA *>(srna->cont.next))
+  {
+    /* NOTE(@ideasman42): each call locks the Python's GIL. Only locking/unlocking once
+     * is possible but gives barely measurable speedup (< ~1millisecond) so leave as-is. */
+    BPY_free_srna_pytype(srna);
+  }
+#endif
 }
 
 void RNA_exit()
@@ -471,7 +491,7 @@ void rna_property_rna_or_id_get(PropertyRNA *prop,
    * distinguish it from IDProperty structs. If it is an ID property,
    * we look up an IDP PropertyRNA based on the type, and set the data
    * pointer to the IDProperty. */
-  memset(r_prop_rna_or_id, 0, sizeof(*r_prop_rna_or_id));
+  *r_prop_rna_or_id = {};
 
   r_prop_rna_or_id->ptr = *ptr;
   r_prop_rna_or_id->rawprop = prop;
@@ -4076,7 +4096,7 @@ void RNA_property_collection_begin(PointerRNA *ptr,
 
   BLI_assert(RNA_property_type(prop) == PROP_COLLECTION);
 
-  memset(iter, 0, sizeof(*iter));
+  *iter = {};
 
   if ((idprop = rna_idproperty_check(&prop, ptr)) || (prop->flag & PROP_IDPROPERTY)) {
     iter->parent = *ptr;
@@ -4238,7 +4258,7 @@ void RNA_property_collection_add(PointerRNA *ptr, PropertyRNA *prop, PointerRNA 
   bool is_liboverride;
   if (!property_collection_liboverride_editable(ptr, prop, &is_liboverride)) {
     if (r_ptr) {
-      memset(r_ptr, 0, sizeof(*r_ptr));
+      *r_ptr = {};
     }
     return;
   }
@@ -4284,7 +4304,7 @@ void RNA_property_collection_add(PointerRNA *ptr, PropertyRNA *prop, PointerRNA 
       rna_pointer_inherit_id(nullptr, ptr, r_ptr);
     }
     else {
-      memset(r_ptr, 0, sizeof(*r_ptr));
+      *r_ptr = {};
     }
   }
 }
@@ -4487,7 +4507,7 @@ bool RNA_property_collection_lookup_int(PointerRNA *ptr,
   RNA_property_collection_end(&iter);
 
   if (!iter.valid) {
-    memset(r_ptr, 0, sizeof(*r_ptr));
+    *r_ptr = {};
   }
 
   return iter.valid;
@@ -4544,7 +4564,7 @@ bool RNA_property_collection_lookup_string_index(
   RNA_property_collection_end(&iter);
 
   if (!iter.valid) {
-    memset(r_ptr, 0, sizeof(*r_ptr));
+    *r_ptr = {};
     *r_index = -1;
   }
   else {
@@ -6707,7 +6727,7 @@ bool RNA_property_assign_default(PointerRNA *ptr, PropertyRNA *prop)
 }
 
 #ifdef WITH_PYTHON
-extern "C" void PyC_LineSpit(void);
+extern void PyC_LineSpit(void);
 #endif
 
 void _RNA_warning(const char *format, ...)

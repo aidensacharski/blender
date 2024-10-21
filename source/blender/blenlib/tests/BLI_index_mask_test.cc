@@ -161,6 +161,9 @@ TEST(index_mask, FromBitsAlternating)
   EXPECT_EQ(mask[3], 6);
 }
 
+/* The benchmark is too slow to run during normal test runs. */
+#if 0
+
 static BitVector<> build_bits_with_uniform_distribution(const int bits_num,
                                                         const int set_bits_num,
                                                         const uint32_t seed = 0)
@@ -183,9 +186,6 @@ static BitVector<> build_bits_with_uniform_distribution(const int bits_num,
   }
   return bit_vec;
 }
-
-/* The benchmark is too slow to run during normal test runs. */
-#if 0
 
 static void benchmark_uniform_bit_distribution(const int bits_num,
                                                const int set_bits_num,
@@ -471,6 +471,39 @@ TEST(index_mask, ToRange)
     const IndexMask mask{range};
     EXPECT_TRUE(mask.to_range().has_value());
     EXPECT_EQ(*mask.to_range(), range);
+  }
+}
+
+TEST(index_mask, ToBits)
+{
+  IndexMaskMemory memory;
+  {
+    const IndexMask mask = IndexMask::from_indices<int>({4, 5, 6, 7}, memory);
+    BitVector<> bits(mask.min_array_size());
+    mask.to_bits(bits);
+    EXPECT_EQ(bits[0].test(), false);
+    EXPECT_EQ(bits[1].test(), false);
+    EXPECT_EQ(bits[2].test(), false);
+    EXPECT_EQ(bits[3].test(), false);
+    EXPECT_EQ(bits[4].test(), true);
+    EXPECT_EQ(bits[5].test(), true);
+    EXPECT_EQ(bits[6].test(), true);
+    EXPECT_EQ(bits[7].test(), true);
+  }
+  {
+    const IndexMask mask = IndexMask::from_indices<int>({4, 5, 6, 7}, memory);
+    BitVector<> bits(mask.min_array_size());
+    bits[0].set();
+    bits[2].set();
+    mask.set_bits(bits);
+    EXPECT_EQ(bits[0].test(), true);
+    EXPECT_EQ(bits[1].test(), false);
+    EXPECT_EQ(bits[2].test(), true);
+    EXPECT_EQ(bits[3].test(), false);
+    EXPECT_EQ(bits[4].test(), true);
+    EXPECT_EQ(bits[5].test(), true);
+    EXPECT_EQ(bits[6].test(), true);
+    EXPECT_EQ(bits[7].test(), true);
   }
 }
 

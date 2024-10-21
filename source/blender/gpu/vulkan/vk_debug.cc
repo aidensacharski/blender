@@ -74,9 +74,10 @@ bool VKContext::debug_capture_scope_begin(void *scope)
   if (StringRefNull(title) != StringRefNull(G.gpu_debug_scope_name)) {
     return false;
   }
-  GLBackend::get()->debug_capture_begin(title);
-#endif
+  VKBackend::get().debug_capture_begin(title);
+#else
   UNUSED_VARS(scope);
+#endif
   return false;
 }
 
@@ -85,8 +86,10 @@ void VKContext::debug_capture_scope_end(void *scope)
 #ifdef WITH_RENDERDOC
   const char *title = (const char *)scope;
   if (StringRefNull(title) == StringRefNull(G.gpu_debug_scope_name)) {
-    GLBackend::get()->debug_capture_end();
+    VKBackend::get().debug_capture_end();
   }
+#else
+  UNUSED_VARS(scope);
 #endif
 }
 

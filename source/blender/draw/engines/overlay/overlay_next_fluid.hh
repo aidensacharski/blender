@@ -45,8 +45,8 @@ class Fluids {
     {
       auto &pass = fluid_ps_;
       pass.init();
-      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL |
-                     state.clipping_state);
+      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL,
+                     state.clipping_plane_count);
       res.select_bind(pass);
 
       /* TODO(fclem): Use either specialization constants or push constants to reduce the amount of
@@ -104,7 +104,7 @@ class Fluids {
       return;
     }
 
-    ResourceHandle res_handle = manager.resource_handle(ob_ref);
+    ResourceHandle res_handle = manager.unique_handle(ob_ref);
     select::ID sel_id = res.select_id(ob_ref);
 
     /* Small cube showing voxel size. */
