@@ -138,6 +138,9 @@ void viewplace_modal_keymap(wmKeyConfig *keyconf);
 void VIEW3D_OT_object_mode_pie_or_toggle(wmOperatorType *ot);
 void view3d_buttons_register(ARegionType *art);
 
+/* `view3d_bdk_buttons.cc` */
+void bdk_view3d_buttons_register(ARegionType* art);
+
 /* `view3d_camera_control.cc` */
 
 /**

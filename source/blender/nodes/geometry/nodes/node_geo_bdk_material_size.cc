@@ -65,7 +65,7 @@ namespace blender::nodes::node_geo_bdk_material_size_cc {
     geo_node_type_base(&ntype, GEO_NODE_BDK_MATERIAL_SIZE, "BDK Material Size", NODE_CLASS_INPUT);
     ntype.declare = file_ns::node_declare;
     ntype.geometry_node_execute = file_ns::node_geo_exec;
-    nodeRegisterType(&ntype);
+    blender::bke::node_register_type(&ntype);
   }
 
   NOD_REGISTER_NODE(node_register)

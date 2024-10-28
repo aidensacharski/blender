@@ -64,12 +64,12 @@ namespace blender::nodes::node_geo_bdk_object_type_cc {
   {
     namespace file_ns = blender::nodes::node_geo_bdk_object_type_cc;
 
-    static bNodeType ntype;
+    static blender::bke::bNodeType ntype;
 
     geo_node_type_base(&ntype, GEO_NODE_BDK_OBJECT_TYPE, "BDK Object Type", NODE_CLASS_GEOMETRY);
     ntype.declare = file_ns::node_declare;
     ntype.geometry_node_execute = file_ns::node_geo_exec;
-    nodeRegisterType(&ntype);
+    blender::bke::node_register_type(&ntype);
   }
 
   NOD_REGISTER_NODE(node_register);

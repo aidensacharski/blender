@@ -19,7 +19,7 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
 #include "BLI_array_utils.h"
 #include "BLI_blenlib.h"
@@ -29,12 +29,12 @@
 #include "BLI_generic_pointer.hh"
 
 #include "BKE_attribute.hh"
-#include "BKE_context.h"
-#include "BKE_customdata.h"
-#include "BKE_editmesh.h"
-#include "BKE_layer.h"
+#include "BKE_context.hh"
+#include "BKE_customdata.hh"
+#include "BKE_editmesh.hh"
+#include "BKE_layer.hh"
 #include "BKE_object.hh"
-#include "BKE_report.h"
+#include "BKE_report.hh"
 #include "BKE_screen.hh"
 
 #include "DEG_depsgraph.hh"
@@ -52,7 +52,7 @@
 #include "UI_interface.hh"
 #include "UI_resources.hh"
 
-#include "view3d_intern.h" /* own include */
+#include "view3d_intern.hh" /* own include */
 
 #pragma optimize("", off)
 
@@ -174,10 +174,14 @@ const char* bdk_read_only_attribute_name = "bdk.read_only";
 
 static void bdk_view3d_panel_bsp_surface_poly_flags(const bContext* C, Panel* panel)
 {
-  Mesh* me = ED_mesh_context(C);
-  BMEditMesh* em = BKE_editmesh_from_object(ED_object_context(C));
+  const Scene* scene = CTX_data_scene(C);
+  ViewLayer* view_layer = CTX_data_view_layer(C);
+  BKE_view_layer_synced_ensure(scene, view_layer);
+  Object* ob = BKE_view_layer_active_object_get(view_layer);
+  BMEditMesh* em = BKE_editmesh_from_object(ob);
   BMesh* bm = em->bm;
   BMFace* actface = bm->act_face;
+  Mesh *me = ED_mesh_context(C);
 
   if (actface == nullptr) {
     return;
@@ -210,16 +214,20 @@ static void bdk_view3d_panel_bsp_surface_poly_flags(const bContext* C, Panel* pa
       IFACE_(poly_flag_strings[i]),
       0, yi -= buth,
       butw, buth,
-      nullptr, 0, 0, 0, 0, nullptr
+      nullptr, 0, 0, nullptr
     );
     UI_but_func_set(but, [C, poly_flags_layer, face_poly_flags, flag_mask](bContext& context) {
       Mesh* me = ED_mesh_context(&context);
-      BMEditMesh* em = BKE_editmesh_from_object(ED_object_context(&context));
+      const Scene* scene = CTX_data_scene(C);
+      ViewLayer* view_layer = CTX_data_view_layer(C);
+      BKE_view_layer_synced_ensure(scene, view_layer);
+      Object* ob = BKE_view_layer_active_object_get(view_layer);
+      BMEditMesh* em = BKE_editmesh_from_object(ob);
       BMesh* bm = em->bm;
       BMFace* actface = bm->act_face;
       BM_ELEM_CD_SET_INT(actface, poly_flags_layer->offset, face_poly_flags ^ flag_mask);
       EDBMUpdate_Params update{};
-      update.calc_looptri = false;
+      update.calc_looptris = false;
       update.calc_normals = false;
       update.is_destructive = false;
       EDBM_update(me, &update);
@@ -230,7 +238,7 @@ static void bdk_view3d_panel_bsp_surface_poly_flags(const bContext* C, Panel* pa
   }
 }
 
-static bool bdk_view3d_panel_bsp_surface_poly_flags_poll(const bContext* C, PanelType* /*pt*/)
+static bool bdk_view3d_panel_bsp_surface_poly_flags_poll(const bContext* /*C*/, PanelType* /*pt*/)
 {
   return true;
 }
@@ -270,8 +278,7 @@ static bool bdk_view3d_panel_bsp_surface_poll(const bContext* C, PanelType* /*pt
     return false;
   }
 
-  Mesh* me = static_cast<Mesh*>(ob->data);
-  BMEditMesh* em = me->edit_mesh;
+  BMEditMesh* em = BKE_editmesh_from_object(ob);
   BMesh* bm = em ? em->bm : nullptr;
   return em != nullptr && em->selectmode & SCE_SELECT_FACE && bm->totfacesel > 0;
 }

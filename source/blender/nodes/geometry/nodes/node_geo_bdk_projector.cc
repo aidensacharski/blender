@@ -412,12 +412,12 @@ namespace blender::nodes::node_geo_bdk_projector_cc {
 
         // UVs
         {
-          AnonymousAttributeIDPtr uv_map_id = params.get_output_anonymous_attribute_id_if_needed("UV Map");
+          auto uv_map_id = params.get_output_anonymous_attribute_id_if_needed("UV Map");
 
           if (uv_map_id) {
             MutableAttributeAccessor attributes = mesh->attributes_for_write();
 
-            SpanAttributeWriter<float2> uv_attribute = attributes.lookup_or_add_for_write_only_span<float2>(uv_map_id.get(), AttrDomain::Corner);
+            SpanAttributeWriter<float2> uv_attribute = attributes.lookup_or_add_for_write_only_span<float2>(uv_map_id.value(), AttrDomain::Corner);
             MutableSpan<float2> uvs = uv_attribute.span;
             int index = 0;
             for (const auto& position : positions) {
@@ -436,12 +436,12 @@ namespace blender::nodes::node_geo_bdk_projector_cc {
 
         // Attenutation
         {
-          AnonymousAttributeIDPtr attenuation_id = params.get_output_anonymous_attribute_id_if_needed("Attenuation");
+          auto attenuation_id = params.get_output_anonymous_attribute_id_if_needed("Attenuation");
 
           if (attenuation_id) {
             MutableAttributeAccessor attributes = mesh->attributes_for_write();
 
-            SpanAttributeWriter<float> attenuation_attribute = attributes.lookup_or_add_for_write_only_span<float>(attenuation_id.get(), AttrDomain::Point);
+            SpanAttributeWriter<float> attenuation_attribute = attributes.lookup_or_add_for_write_only_span<float>(attenuation_id.value(), AttrDomain::Point);
             MutableSpan<float> attenuations = attenuation_attribute.span;
 
             int index = 0;
@@ -471,7 +471,7 @@ namespace blender::nodes::node_geo_bdk_projector_cc {
     geo_node_type_base(&ntype, GEO_NODE_BDK_PROJECTOR, "BDK Projector", NODE_CLASS_GEOMETRY);
     ntype.declare = file_ns::node_declare;
     ntype.geometry_node_execute = file_ns::node_geo_exec;
-    nodeRegisterType(&ntype);
+    blender::bke::node_register_type(&ntype);
   }
 
   NOD_REGISTER_NODE(node_register);

@@ -36,7 +36,7 @@ static void node_update(bNodeTree *ntree, bNode *node)
 {
   bNodeSocket *sockB = (bNodeSocket *)BLI_findlink(&node->inputs, 1);
 
-  bke::nodeSetSocketAvailability(ntree, sockB, !ELEM(node->custom1, NODE_BITWISE_COMPLEMENT));
+  bke::node_set_socket_availability(ntree, sockB, !ELEM(node->custom1, NODE_BITWISE_COMPLEMENT));
 }
 
 static void node_label(const bNodeTree * /*tree*/,
@@ -128,7 +128,7 @@ static void node_rna(StructRNA *srna)
 
 static void node_register()
 {
-  static bNodeType ntype;
+	static blender::bke::bNodeType ntype;
 
   fn_node_type_base(&ntype, FN_NODE_BITWISE_OPERATION, "Bitwise Operation", NODE_CLASS_CONVERTER);
   ntype.declare = node_declare;
@@ -137,7 +137,7 @@ static void node_register()
   ntype.build_multi_function = node_build_multi_function;
   ntype.draw_buttons = node_layout;
   //ntype.gather_link_search_ops = node_gather_link_searches;
-  nodeRegisterType(&ntype);
+  blender::bke::node_register_type(&ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

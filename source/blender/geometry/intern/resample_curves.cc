@@ -652,7 +652,7 @@ CurvesGeometry resample_to_equidistant(const CurvesGeometry& src_curves,
 
   offset_indices::accumulate_counts_to_offsets(dst_offsets);
 
-  AttributesForInterpolation attributes;
+  AttributesForResample attributes;
   gather_point_attributes_to_interpolate(src_curves, dst_curves, attributes, output_ids);
   copy_or_defaults_for_unselected_curves(src_curves, unselected, attributes, dst_curves);
 

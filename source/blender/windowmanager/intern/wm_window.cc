@@ -539,7 +539,7 @@ void WM_window_title(wmWindowManager *wm, wmWindow *win, const char *title)
   }
 
   str += " - BDK ";
-  str += BKE_blender_version_string
+  str += BKE_blender_version_string();
   GHOST_SetTitle(handle, str.c_str());
 
   /* Informs GHOST of unsaved changes to set the window modified visual indicator (macOS)

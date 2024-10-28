@@ -43,7 +43,7 @@ static void node_declare(NodeDeclarationBuilder &b)
                      .min(0.001f)
                      .subtype(PROP_DISTANCE)
                      .make_available([](bNode &node) {
-                       node_storage(node).mode = GEO_NODE_CURVE_RESAMPLE_LENGTH;
+                       //node_storage(node).mode = GEO_NODE_CURVE_RESAMPLE_LENGTH;
                      });
   b.add_output<decl::Geometry>("Points").propagate_all();
   b.add_output<decl::Vector>("Tangent").field_on_all();
@@ -56,7 +56,7 @@ static void node_declare(NodeDeclarationBuilder &b)
     const GeometryNodeCurveResampleMode mode = GeometryNodeCurveResampleMode(storage.mode);
 
     count.available(mode == GEO_NODE_CURVE_RESAMPLE_COUNT);
-    length.available(mode == GEO_NODE_CURVE_RESAMPLE_LENGTH);
+    length.available(ELEM(mode, GEO_NODE_CURVE_RESAMPLE_LENGTH, GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT));
   }
 }
 
@@ -81,8 +81,8 @@ static void node_update(bNodeTree *ntree, bNode *node)
   bNodeSocket *count_socket = static_cast<bNodeSocket *>(node->inputs.first)->next;
   bNodeSocket *length_socket = count_socket->next;
 
-  bke::nodeSetSocketAvailability(ntree, count_socket, mode == GEO_NODE_CURVE_RESAMPLE_COUNT);
-  bke::nodeSetSocketAvailability(ntree, length_socket, ELEM(mode, GEO_NODE_CURVE_RESAMPLE_LENGTH, GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT));
+  bke::node_set_socket_availability(ntree, count_socket, mode == GEO_NODE_CURVE_RESAMPLE_COUNT);
+  bke::node_set_socket_availability(ntree, length_socket, ELEM(mode, GEO_NODE_CURVE_RESAMPLE_LENGTH, GEO_NODE_CURVE_RESAMPLE_EQUIDISTANT));
 }
 
 static void fill_rotation_attribute(const Span<float3> tangents,
@@ -218,13 +218,13 @@ static void curve_to_points(GeometrySet &geometry_set,
       geometry_set.modify_geometry_sets([&](GeometrySet& geometry) {
         if (const Curves* src_curves_id = geometry.get_curves()) {
           const bke::CurvesGeometry& src_curves = src_curves_id->geometry.wrap();
-          const bke::CurvesFieldContext field_context{ src_curves, ATTR_DOMAIN_CURVE };
+          const bke::CurvesFieldContext field_context{ src_curves, AttrDomain::Curve };
           bke::CurvesGeometry dst_curves = geometry::resample_to_equidistant(
             src_curves, field_context, fn::make_constant_field<bool>(true), length, resample_attributes);
           PointCloud *point_cloud = pointcloud_from_curves(std::move(dst_curves),
                                                            resample_attributes.tangent_id,
                                                            resample_attributes.normal_id,
-                                                           rotation_anonymous_id.get());
+                                                           rotation_anonymous_id);
           geometry.remove_geometry_during_modify();
           geometry.replace_pointcloud(point_cloud);
         }
@@ -419,6 +419,7 @@ static void node_register()
   blender::bke::node_type_storage(
       &ntype, "NodeGeometryCurveToPoints", node_free_standard_storage, node_copy_standard_storage);
   ntype.initfunc = node_init;
+  ntype.updatefunc = node_update;
   blender::bke::node_register_type(&ntype);
 
   node_rna(ntype.rna_ext.srna);

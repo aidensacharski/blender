@@ -275,8 +275,8 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
 
   namespace {
   struct AttributeOutputs {
-    AnonymousAttributeIDPtr rotation_id;
-    AnonymousAttributeIDPtr scale_id;
+    std::optional<std::string> rotation_id;
+    std::optional<std::string> scale_id;
   };
 }  // namespace
 
@@ -295,7 +295,7 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
 
     const Mesh* mesh = geometry_set.get_mesh();
 
-    if (mesh->totvert != vertex_count) {
+    if (mesh->verts_num != vertex_count) {
       params.error_message_add(NodeWarningType::Error, "Incorrect vertex count");
       params.set_default_remaining_outputs();
       return;
@@ -319,9 +319,9 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
       if (!attributes.has_value()) {
         continue;
       }
-      if (attributes->domain_supported(ATTR_DOMAIN_POINT)) {
-        bke::GeometryFieldContext field_context{ *component, ATTR_DOMAIN_POINT };
-        const int domain_num = attributes->domain_size(ATTR_DOMAIN_POINT);
+      if (attributes->domain_supported(blender::bke::AttrDomain::Point)) {
+        bke::GeometryFieldContext field_context{ *component, blender::bke::AttrDomain::Point };
+        const int domain_num = attributes->domain_size(blender::bke::AttrDomain::Point);
 
         fn::FieldEvaluator data_evaluator{ field_context, domain_num };
         data_evaluator.add(density_map_field);
@@ -343,7 +343,7 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
 
     int point_count = 0;
     const AttributeAccessor attributes = mesh->attributes();
-    const VArray<int> material_indices = *attributes.lookup_or_default<int>("material_index", ATTR_DOMAIN_FACE, 0);
+    const VArray<int> material_indices = *attributes.lookup_or_default<int>("material_index", blender::bke::AttrDomain::Face, 0);
 
     UpdateDecorationsParams update_params = {};
     update_params.mesh = mesh;
@@ -388,7 +388,7 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
     PointCloud* pointcloud = BKE_pointcloud_new_nomain(positions.size());
     bke::MutableAttributeAccessor point_attributes = pointcloud->attributes_for_write();
     bke::SpanAttributeWriter<float3> point_positions =
-      point_attributes.lookup_or_add_for_write_only_span<float3>("position", ATTR_DOMAIN_POINT);
+      point_attributes.lookup_or_add_for_write_only_span<float3>("position", blender::bke::AttrDomain::Point);
     point_positions.span.copy_from(positions);
     point_positions.finish();
 
@@ -401,19 +401,19 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
 
     if (attribute_outputs.rotation_id) {
       rotations_writer = point_attributes.lookup_or_add_for_write_only_span<float3>(
-        attribute_outputs.rotation_id.get(), ATTR_DOMAIN_POINT);
+        attribute_outputs.rotation_id.value(), blender::bke::AttrDomain::Point);
     }
 
     if (attribute_outputs.scale_id) {
       scales_writer = point_attributes.lookup_or_add_for_write_only_span<float3>(
-        attribute_outputs.scale_id.get(), ATTR_DOMAIN_POINT);
+        attribute_outputs.scale_id.value(), blender::bke::AttrDomain::Point);
     }
 
-    Map<AttributeIDRef, AttributeKind> attributes_to_propagate;
+    Map<StringRef, AttributeKind> attributes_to_propagate;
     geometry_set.gather_attributes_for_propagation({ GeometryComponent::Type::Mesh },
       GeometryComponent::Type::PointCloud,
       false,
-      params.get_output_propagation_info("Points"),
+      params.get_attribute_filter("Points"),
       attributes_to_propagate);
 
     rotations_writer.span.copy_from(rotations);
@@ -429,12 +429,12 @@ namespace blender::nodes::node_geo_bdk_deco_layer_cc {
   {
     namespace file_ns = blender::nodes::node_geo_bdk_deco_layer_cc;
 
-    static bNodeType ntype;
+    static blender::bke::bNodeType ntype;
 
     geo_node_type_base(&ntype, GEO_NODE_BDK_DECO_LAYER, "BDK DecoLayer", NODE_CLASS_GEOMETRY);
     ntype.declare = file_ns::node_declare;
     ntype.geometry_node_execute = file_ns::node_geo_exec;
-    nodeRegisterType(&ntype);
+    blender::bke::node_register_type(&ntype);
   }
 
   NOD_REGISTER_NODE(node_register)

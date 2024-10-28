@@ -173,10 +173,10 @@ namespace blender::nodes::node_geo_bdk_terrain_sample_cc {
 
 
     const Mesh* mesh = geometry_set.get_mesh();
-    const int heightmap_size = math::sqrt(mesh->totvert);
+    const int heightmap_size = math::sqrt(mesh->verts_num);
     const int vertex_count = heightmap_size * heightmap_size;
 
-    if (mesh->totvert != vertex_count) {
+    if (mesh->verts_num != vertex_count) {
       params.error_message_add(NodeWarningType::Error, "Incorrect vertex count");
       params.set_default_remaining_outputs();
       return;
@@ -198,12 +198,12 @@ namespace blender::nodes::node_geo_bdk_terrain_sample_cc {
   {
     namespace file_ns = blender::nodes::node_geo_bdk_terrain_sample_cc;
 
-    static bNodeType ntype;
+    static blender::bke::bNodeType ntype;
 
     geo_node_type_base(&ntype, GEO_NODE_BDK_TERRAIN_SAMPLE, "BDK Terrain Sample", NODE_CLASS_GEOMETRY);
     ntype.declare = file_ns::node_declare;
     ntype.geometry_node_execute = file_ns::node_geo_exec;
-    nodeRegisterType(&ntype);
+    blender::bke::node_register_type(&ntype);
   }
 
   NOD_REGISTER_NODE(node_register)

@@ -12,8 +12,6 @@
 #include "BLI_math_vector.h"
 #include "BLI_task.hh"
 
-#pragma optimize("", off)
-
 namespace blender::nodes::node_geo_bdk_fluid_surface_cc {
 
   enum NodeGeometryBDKFluidSurfaceType
@@ -309,7 +307,7 @@ namespace blender::nodes::node_geo_bdk_fluid_surface_cc {
     MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
     MutableSpan<int> corner_edges = mesh->corner_edges_for_write();
 
-    BKE_mesh_smooth_flag_set(mesh, false);
+    //BKE_mesh_smooth_flag_set(mesh, false);
 
     offset_indices::fill_constant_group_size(3, 0, mesh->face_offsets_for_write());
 
@@ -477,12 +475,12 @@ namespace blender::nodes::node_geo_bdk_fluid_surface_cc {
   {
     namespace file_ns = blender::nodes::node_geo_bdk_fluid_surface_cc;
 
-    static bNodeType ntype;
+    static blender::bke::bNodeType ntype;
 
     geo_node_type_base(&ntype, GEO_NODE_BDK_FLUID_SURFACE, "BDK FluidSurface", NODE_CLASS_GEOMETRY);
     ntype.declare = file_ns::node_declare;
     ntype.geometry_node_execute = file_ns::node_geo_exec;
-    nodeRegisterType(&ntype);
+    blender::bke::node_register_type(&ntype);
   }
 
   NOD_REGISTER_NODE(node_register)
